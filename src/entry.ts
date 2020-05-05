@@ -7,7 +7,7 @@ import { readFile, writeFile, unlink } from 'fs';
 import { fromCallback } from 'bluebird';
 import { forEachLimit } from 'async';
 import { TikTokScraper } from './core';
-import { TikTokConstructor, Options, ScrapeType, Result, UserData, Challenge, PostCollector, History, HistoryItem } from './types';
+import { TikTokConstructor, Options, ScrapeType, Result, UserData, Challenge, PostCollector, History, HistoryItem, CommentsResponse } from './types';
 import CONST from './constant';
 
 const INIT_OPTIONS = {
@@ -166,6 +166,23 @@ export const video = async (input: string, options?: Options): Promise<any> => {
         ...(options?.download ? { message: `Video location: ${contructor.filepath}/${result.id}.mp4` } : {}),
         ...outputMessage,
     };
+};
+
+export const getComments = async (input: string, cookie: string, options?: Options, cursor = 0): Promise<CommentsResponse> => {
+    if (!cookie || typeof cookie !== 'string') {
+        throw new TypeError('cookie is required as a string');
+    }
+    if (options && typeof options !== 'object') {
+        throw new TypeError('Object is expected');
+    }
+    if (options?.proxyFile) {
+        options.proxy = await proxyFromFile(options?.proxyFile);
+    }
+    const contructor: TikTokConstructor = { ...INIT_OPTIONS, ...options, ...{ type: 'video_meta' as ScrapeType, input } };
+    const scraper = new TikTokScraper(contructor);
+
+    const result = await scraper.getComments(cookie, cursor);
+    return result;
 };
 
 // eslint-disable-next-line no-unused-vars

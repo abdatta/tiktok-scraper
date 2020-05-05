@@ -131,3 +131,30 @@ export interface VideoProps {
         };
     };
 }
+
+export interface CommentsResponse {
+    status_code: number;
+    comments: Comment[];
+    cursor: number;
+    has_more: number;
+}
+
+export interface Comment {
+    cid: string;
+    text: string;
+    aweme_id: string;
+    create_time: number;
+    digg_count: number;
+    status: number;
+    user: {[k: string]: any};
+    reply_id: string;
+    user_digged: number;
+    reply_comment: {[k: string]: any}[];
+    text_extra: {[k: string]: any}[];
+    reply_comment_total: number;
+    reply_to_reply_id: string;
+    is_author_digged: boolean;
+    stick_position: number;
+    user_buried: boolean;
+    label_list: {[k: string]: any}[]
+}

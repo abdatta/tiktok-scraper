@@ -27,6 +27,7 @@ import {
     Item,
     History,
     Proxy,
+    CommentsResponse
 } from '../types';
 
 import { Downloader } from '../core';
@@ -982,6 +983,46 @@ export class TikTokScraper extends EventEmitter {
                 return videoItem;
             }
             throw new Error(`Can't extract video meta data`);
+        } catch (error) {
+            throw error.message;
+        }
+    }
+
+    /**
+     * Get comments on a video
+     * @requires cookie
+     * @param cookie
+     */
+    public async getComments(cookie: string, cursor: number): Promise<CommentsResponse> {
+        if (!this.input) {
+            throw `COmment Id is missing`;
+        }
+        await this.extractTac();
+        const signature = generateSignature(
+            `https://www.tiktok.com/api/comment/list/?aweme_id=${this.input}&cursor=${cursor}&count=${this.number}`,
+            this.userAgent,
+            this.tacValue,
+        );
+
+        const query = {
+            uri: `https://www.tiktok.com/api/comment/list/`,
+            method: 'GET',
+            qs: {
+                aweme_id: this.input,
+                cursor: cursor,
+                count: this.number,
+                _signature: signature
+            },
+            headers: { cookie },
+            json: true,
+        };
+
+        try {
+            const response = await this.request<CommentsResponse>(query);
+            if (response.status_code !== 0 || !response.comments) {
+                throw new Error(`Can't find comment: ${this.input} `);
+            }
+            return response;
         } catch (error) {
             throw error.message;
         }
